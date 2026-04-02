@@ -120,16 +120,23 @@
     /* Vinyl Stage Positioning */
     .vinyl-stage {
       position: absolute;
-      right: -10vw; /* Pushes it slightly off-screen for that 'hidden' feel */
+      right: -10vw;
       top: 50%;
       transform: translateY(-50%);
       width: 50vw;
       max-width: 600px;
       aspect-ratio: 1/1;
-      z-index: 1;
-      pointer-events: none;
+      z-index: 10; /* INCREASED: Brings the vinyl above the text for hovering */
+      cursor: pointer; /* ADDED: Shows the hand icon */
+      /* pointer-events: none; <-- DELETE THIS LINE */
     }
 
+    /* Add this new class for the wrapper */
+    .vinyl-scroll-wrapper {
+      width: 100%;
+      height: 100%;
+      will-change: transform;
+    }
     .vinyl-asset {
       width: 100%;
       height: auto;
@@ -224,9 +231,10 @@
       </div>
 
       <div class="vinyl-stage">
+      <div class="vinyl-scroll-wrapper">
         <img src="https://assets.codepen.io/14179/vinyl-record.png" alt="Spinning Vinyl" class="vinyl-asset" />
       </div>
-    </section>
+    </div>
 
     <section class="patio-reveal" id="about">
       <div class="patio-content">
@@ -310,7 +318,9 @@
       );
 
       // --- 2. HERO: Scroll-Triggered Vinyl Rotation ---
-      gsap.to(".vinyl-asset", {
+      
+      // 2A. Apply the scroll effect to the OUTER wrapper
+      gsap.to(".vinyl-scroll-wrapper", {
         rotation: 360, 
         ease: "none",  
         scrollTrigger: {
@@ -319,6 +329,53 @@
           end: "bottom bottom",
           scrub: 1 
         }
+      });
+
+      // 2B. Apply the hover effect to the INNER asset
+      const vinylStage = document.querySelector(".vinyl-stage");
+      const vinylAsset = document.querySelector(".vinyl-asset");
+
+      // Create an infinite spin tween, but keep it paused initially
+      const hoverSpin = gsap.to(vinylAsset, {
+        rotation: 360,
+        duration: 1.5, // Speed of the hover spin
+        ease: "none",
+        repeat: -1, // -1 means infinite loop
+        paused: true
+      });
+
+      // When mouse enters, play the spin
+      vinylStage.addEventListener("mouseenter", () => {
+        hoverSpin.play();
+        
+        // Plus One Effect: Lift the record off the platter
+        gsap.to(vinylAsset, { 
+          scale: 1.05, 
+          filter: "drop-shadow(0px 20px 30px rgba(0,0,0,0.6))", 
+          duration: 0.4, 
+          ease: "back.out(1.7)" 
+        });
+      });
+
+      // When mouse leaves, gracefully slow it down to a stop
+      vinylStage.addEventListener("mouseleave", () => {
+        // Smoothly tween the timeScale to 0 so it doesn't just jerk to a halt
+        gsap.to(hoverSpin, { 
+          timeScale: 0, 
+          duration: 0.8, 
+          onComplete: () => {
+            hoverSpin.pause();
+            hoverSpin.timeScale(1); // Reset scale for the next hover
+          }
+        });
+        
+        // Plus One Effect: Drop the record back down
+        gsap.to(vinylAsset, { 
+          scale: 1, 
+          filter: "drop-shadow(0px 0px 0px rgba(0,0,0,0))", 
+          duration: 0.4, 
+          ease: "power2.out" 
+        });
       });
 
       // --- 3. PATIO: Image Parallax Effect ---
