@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ritual Coffeehouse | Analog Vibrations</title>
+  
+  <style>
+    /* ----------------------------------------------------
+       CORE BRAND VARIABLES & TYPOGRAPHY
+    ---------------------------------------------------- */
+    :root {
+      --color-bg-dark: #1A1F1A; /* Deep earthy green/black */
+      --color-espresso: #2A1F18;
+      --color-cream: #F4EBE1;
+      --color-accent: #C28E5E; /* Warm wood/caramel tone */
+      
+      /* Fluid Typography Formula (scales smoothly between 320px and 1200px viewports) */
+      --step-0: clamp(1.00rem, 0.96rem + 0.22vw, 1.13rem);
+      --step-5: clamp(2.49rem, 1.63rem + 4.29vw, 4.77rem);
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      background-color: var(--color-bg-dark);
+      color: var(--color-cream);
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      overflow-x: hidden; /* Crucial: Prevents layout breaking from off-screen elements */
+    }
+
+    /* THE PLUS ONE: CSS Film Grain Overlay */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none; /* Crucial: lets clicks pass through */
+      z-index: 9999;
+      opacity: 0.04; 
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Shared Typography Extensions */
+    .section-title {
+      font-size: var(--step-5);
+      line-height: 1;
+      margin: 0 0 1rem 0;
+      text-transform: uppercase;
+    }
+    .section-desc {
+      font-size: var(--step-0);
+      opacity: 0.7;
+      max-width: 400px;
+    }
+
+    /* ----------------------------------------------------
+       SECTION 1: HERO (ANALOG VIBRATIONS)
+    ---------------------------------------------------- */
+    .hero-analog {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 5vw;
+      box-sizing: border-box;
+    }
+
+    .hero-text-wrapper {
+      position: relative;
+      z-index: 2; /* Keeps text above the vinyl */
+      max-width: 60%;
+    }
+
+    .hero-title {
+      font-size: var(--step-5);
+      line-height: 0.9;
+      margin: 0 0 2rem 0;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-title .line {
+      display: block;
+      overflow: hidden; /* For GSAP text reveal masking */
+    }
+
+    .hero-title .indent {
+      margin-left: 10vw;
+      color: var(--color-accent);
+    }
+
+    .hero-subtitle {
+      font-size: var(--step-0);
+      max-width: 400px;
+      line-height: 1.5;
+      opacity: 0.8;
+    }
+
+    /* "What's Spinning" Widget Styling */
+    .spinning-now-widget {
+      margin-top: 4rem;
+      border-left: 2px solid var(--color-accent);
+      padding-left: 1rem;
+    }
+
+    .widget-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 0 0 0.5rem 0;
+      opacity: 0.6;
+    }
+
+    .track-name {
+      font-size: 1.2rem;
+      margin: 0;
+      font-weight: bold;
+    }
+
+    /* Vinyl Stage Positioning */
+    .vinyl-stage {
+      position: absolute;
+      right: -10vw; /* Pushes it slightly off-screen for that 'hidden' feel */
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50vw;
+      max-width: 600px;
+      aspect-ratio: 1/1;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .vinyl-asset {
+      width: 100%;
+      height: auto;
+      will-change: transform;
+    }
+
+    /* ----------------------------------------------------
+       SECTION 2: PATIO REVEAL (PARALLAX)
+    ---------------------------------------------------- */
+    .patio-reveal {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5vw;
+      background: var(--color-espresso);
+      position: relative;
+      overflow: hidden;
+    }
+    .patio-content {
+      width: 40%;
+      z-index: 2;
+    }
+    .patio-image-wrapper {
+      width: 50%;
+      height: 70vh;
+      overflow: hidden; /* Clips the image for the parallax effect */
+      border-radius: 8px;
+    }
+    .patio-image {
+      width: 100%;
+      height: 130%; /* Taller than wrapper to allow room to move via GSAP */
+      background-size: cover;
+      background-position: center;
+      will-change: transform;
+    }
+
+    /* ----------------------------------------------------
+       SECTION 3: MENU (CRATE DIGGER SCROLL)
+    ---------------------------------------------------- */
+    .menu-section {
+      padding: 10vw 0 10vw 5vw;
+      background: var(--color-bg-dark);
+      overflow: hidden; /* Prevents horizontal scrollbar natively */
+    }
+    .menu-header {
+      margin-bottom: 4rem;
+    }
+    .menu-track-container {
+      width: 100%;
+    }
+    .menu-track {
+      display: flex;
+      gap: 2rem;
+      width: max-content; /* Allows track to be as wide as its children */
+      will-change: transform;
+    }
+    .menu-card {
+      width: 300px;
+      background: var(--color-espresso);
+      padding: 2rem;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.3s ease;
+    }
+    .menu-card:hover {
+      background: rgba(194, 142, 94, 0.1); /* Subtle warm glow on hover */
+    }
+    .menu-card h3 { margin: 0 0 0.5rem 0; font-size: 1.5rem; }
+    .menu-card p { font-size: 0.9rem; opacity: 0.7; flex-grow: 1; }
+    .menu-card .price { font-weight: bold; color: var(--color-accent); margin-top: 1rem; }
+  </style>
+</head>
+<body>
+
+  <main class="ritual-experience">
+    
+    <section class="hero-analog" id="hero">
+      <div class="hero-text-wrapper">
+        <h1 class="hero-title">
+          <span class="line">Analog</span>
+          <span class="line indent">Vibrations.</span>
+        </h1>
+        <p class="hero-subtitle">Late nights. High-end roasts. Hidden in plain sight.</p>
+        
+        <div class="spinning-now-widget">
+          <p class="widget-label">Now Spinning</p>
+          <p class="track-name">Miles Davis — Kind of Blue</p>
+        </div>
+      </div>
+
+      <div class="vinyl-stage">
+        <img src="https://assets.codepen.io/14179/vinyl-record.png" alt="Spinning Vinyl" class="vinyl-asset" />
+      </div>
+    </section>
+
+    <section class="patio-reveal" id="about">
+      <div class="patio-content">
+        <h2 class="section-title">No Signs.<br>Just Sanctuary.</h2>
+        <p class="section-desc">Pass through the understated facade and discover our dog-friendly, greenery-filled back patio. An oasis on Irving Park Rd.</p>
+      </div>
+      <div class="patio-image-wrapper">
+        <div class="patio-image" style="background-image: url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2047&auto=format&fit=crop');"></div>
+      </div>
+    </section>
+
+    <section class="menu-section" id="menu">
+      <div class="menu-header">
+        <h2 class="section-title">The Rotation.</h2>
+        <p class="section-desc">Featuring premium roasts from Metric Coffee & Onyx Coffee Lab.</p>
+      </div>
+      
+      <div class="menu-track-container">
+        <div class="menu-track">
+          <div class="menu-card">
+            <h3>Vanilla Latte</h3>
+            <p>House-made artisan syrup, perfectly textured milk.</p>
+            <span class="price">$6.00</span>
+          </div>
+          <div class="menu-card">
+            <h3>V60 Pour Over</h3>
+            <p>Slow-brewed single origin for maximum clarity.</p>
+            <span class="price">$5.00</span>
+          </div>
+          <div class="menu-card">
+            <h3>Cortado</h3>
+            <p>Equal parts bold espresso and steamed milk.</p>
+            <span class="price">$4.50</span>
+          </div>
+          <div class="menu-card">
+            <h3>Turmeric Latte</h3>
+            <p>Spiced with ginger, lemon, and lime.</p>
+            <span class="price">$5.50</span>
+          </div>
+          <div class="menu-card">
+            <h3>Jalapeño Scone</h3>
+            <p>Savory cheddar and sharp jalapeño, baked daily.</p>
+            <span class="price">$4.00</span>
+          </div>
+          <div class="menu-card">
+            <h3>Apple Fritter</h3>
+            <p>Crispy edges, soft center, heavy cinnamon.</p>
+            <span class="price">$4.50</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", (event) => {
+      // Register the ScrollTrigger plugin
+      gsap.registerPlugin(ScrollTrigger);
+
+      // --- 1. HERO: Initial Load Sequence ---
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+      tl.fromTo(".vinyl-asset", 
+        { x: 100, opacity: 0, rotation: -45 },
+        { x: 0, opacity: 1, rotation: 0, duration: 1.5 },
+        0
+      )
+      .fromTo(".hero-title .line", 
+        { yPercent: 100 }, 
+        { yPercent: 0, duration: 1, stagger: 0.15, ease: "expo.out" },
+        0.2
+      )
+      .fromTo([".hero-subtitle", ".spinning-now-widget"],
+        { autoAlpha: 0, y: 20 },
+        { autoAlpha: 1, y: 0, duration: 1, stagger: 0.2 },
+        "-=0.5"
+      );
+
+      // --- 2. HERO: Scroll-Triggered Vinyl Rotation ---
+      gsap.to(".vinyl-asset", {
+        rotation: 360, 
+        ease: "none",  
+        scrollTrigger: {
+          trigger: "body",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1 
+        }
+      });
+
+      // --- 3. PATIO: Image Parallax Effect ---
+      gsap.to(".patio-image", {
+        yPercent: -20, 
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".patio-reveal",
+          start: "top bottom", 
+          end: "bottom top",
+          scrub: true
+        }
+      });
+
+      // --- 4. MENU: "Crate Digger" Horizontal Scroll ---
+      const menuTrack = document.querySelector(".menu-track");
+      
+      // Calculate how far the track needs to move based on its width vs the window
+      let trackWidth = menuTrack.scrollWidth;
+      let moveDistance = trackWidth - window.innerWidth + (window.innerWidth * 0.05); // Accounts for the 5vw padding
+
+      gsap.to(".menu-track", {
+        x: -moveDistance,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".menu-section",
+          start: "center center", 
+          end: () => "+=" + trackWidth, // Pin duration based on track width
+          pin: true, // Locks the section in place while scrolling horizontally
+          scrub: 1,  
+          invalidateOnRefresh: true // Recalculates flawlessly if user resizes the window
+        }
+      });
+    });
+  </script>
+</body>
+</html>
